@@ -23,12 +23,17 @@ app.get('/s3_credentials', function(request, response) {
     throw new Error('md5 is required');
   }
 
-  if (request.query.filename) {
-    // var filename = "images/" +
-    //   crypto.randomBytes(16).toString('hex') +
-    //   path.extname(request.query.filename);
+  if (request.query.content_type !== 'image/jpeg' && request.query.content_type !== 'image/png') {
+    throw new Error('only "image/jpeg" content type is supported');
+  }
 
-    const filename = 'images/test.jpg';
+  if (request.query.filename) {
+
+    var filename = "images/" +
+      crypto.randomBytes(16).toString('hex')
+    // + path.extname(request.query.filename);
+    // TODO: give a filename extension based on the contentType (and validate beforeHand whether it is a valid contentType)
+
     response.json(s3.s3Credentials(s3Config, { filename: filename, contentType: request.query.content_type, md5: request.query.md5 }));
   } else {
     response.status(400).send('filename is required');

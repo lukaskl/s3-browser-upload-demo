@@ -3,7 +3,7 @@
 // client-side validation by fileUpload should match the policy
 // restrictions so that the checks fail early
 var acceptFileType = /.*/i;
-var maxFileSize = 1000;
+var maxFileSize = 20971520;
 // The URL to your endpoint that maps to s3Credentials function
 var credentialsUrl = '/s3_credentials';
 // The URL to your endpoint to register the uploaded file

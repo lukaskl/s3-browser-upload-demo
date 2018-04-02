@@ -46,7 +46,8 @@ function s3Params(config, params) {
     'Content-MD5': hexToBase64(params.md5),
     success_action_status: '201',
     policy: policyBase64,
-    "content-type": params.contentType,
+    // TODO: give a list of possible content types (and text/html should not be one of those)
+    "content-type": 'image/jpeg',
     'x-amz-algorithm': 'AWS4-HMAC-SHA256',
     'x-amz-credential': credential,
     'x-amz-date': dateString() + 'T000000Z',
@@ -77,7 +78,7 @@ function s3UploadPolicy(config, params, credential) {
       // Optionally control content type and file size
       // A content-type clause is required (even if it's all-permissive)
       // so that the uploader can specify a content-type for the file
-      ['starts-with', '$Content-Type', ''],
+      ['starts-with', '$Content-Type', 'image/jpeg'],
       ['content-length-range', 0, 20971520], // 20 MB limit
       { 'x-amz-algorithm': 'AWS4-HMAC-SHA256' },
       { 'x-amz-credential': credential },
