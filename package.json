@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/leonid-shevtsov/s3-upload-demo#readme",
   "dependencies": {
+    "buffer": "^5.1.0",
     "express": "^4.13.3"
   }
 }

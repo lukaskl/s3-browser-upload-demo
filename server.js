@@ -18,11 +18,18 @@ app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
 
 app.get('/s3_credentials', function(request, response) {
+
+  if (!request.query.md5) {
+    throw new Error('md5 is required');
+  }
+
   if (request.query.filename) {
-    var filename =
-      crypto.randomBytes(16).toString('hex') +
-      path.extname(request.query.filename);
-    response.json(s3.s3Credentials(s3Config, {filename: filename, contentType: request.query.content_type}));
+    // var filename = "images/" +
+    //   crypto.randomBytes(16).toString('hex') +
+    //   path.extname(request.query.filename);
+
+    const filename = 'images/test.jpg';
+    response.json(s3.s3Credentials(s3Config, { filename: filename, contentType: request.query.content_type, md5: request.query.md5 }));
   } else {
     response.status(400).send('filename is required');
   }

@@ -1,5 +1,26 @@
 var crypto = require('crypto');
 
+global.Buffer = global.Buffer || require('buffer').Buffer;
+
+if (typeof btoa === 'undefined') {
+  global.btoa = function(str) {
+    return new Buffer(str, 'binary').toString('base64');
+  };
+}
+
+if (typeof atob === 'undefined') {
+  global.atob = function(b64Encoded) {
+    return new Buffer(b64Encoded, 'base64').toString('binary');
+  };
+}
+
+function hexToBase64(hexstring) {
+  return btoa(hexstring.match(/\w{2}/g).map(function(a) {
+    return String.fromCharCode(parseInt(a, 16));
+  }).join(""));
+}
+
+
 // This is the entry function that produces data for the frontend
 // config is hash of S3 configuration:
 // * bucket
@@ -17,10 +38,12 @@ function s3Credentials(config, params) {
 function s3Params(config, params) {
   var credential = amzCredential(config);
   var policy = s3UploadPolicy(config, params, credential);
+  console.log('params', JSON.stringify(params));
   var policyBase64 = new Buffer(JSON.stringify(policy)).toString('base64');
   return {
     key: params.filename,
     acl: 'public-read',
+    'Content-MD5': hexToBase64(params.md5),
     success_action_status: '201',
     policy: policyBase64,
     "content-type": params.contentType,
@@ -49,12 +72,13 @@ function s3UploadPolicy(config, params, credential) {
       { bucket: config.bucket },
       { key: params.filename },
       { acl: 'public-read' },
+      { 'Content-MD5': hexToBase64(params.md5) },
       { success_action_status: "201" },
       // Optionally control content type and file size
       // A content-type clause is required (even if it's all-permissive)
       // so that the uploader can specify a content-type for the file
-      ['starts-with', '$Content-Type',  ''],
-      ['content-length-range', 0, 1000],
+      ['starts-with', '$Content-Type', ''],
+      ['content-length-range', 0, 20971520], // 20 MB limit
       { 'x-amz-algorithm': 'AWS4-HMAC-SHA256' },
       { 'x-amz-credential': credential },
       { 'x-amz-date': dateString() + 'T000000Z' }
